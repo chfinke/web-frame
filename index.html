@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <title>web-frame</title>
   </head>
-  <body style="margin: 0;">
+  <body style="margin: 0; background-color: black">
 	  
     <img id="img" />
     
     <script>
+		
 		function getParameterByName(name, url) {
 			if (!url) url = window.location.href;
 			name = name.replace(/[\[\]]/g, '\\$&');
@@ -19,12 +20,30 @@
 			return decodeURIComponent(results[2].replace(/\+/g, ' '));
 		}
 		
-		const size = window.screen.width + 'x' + window.screen.height;
-		const img = document.getElementById('img');
-		const urlParams = new URLSearchParams(window.location.search);
-		const keyword = urlParams.get('keyword');
-		const interval = parseInt(urlParams.get('interval')) || 0;
+		function getWidth() {
+		  return Math.max(
+			document.body.scrollWidth,
+			document.documentElement.scrollWidth,
+			document.body.offsetWidth,
+			document.documentElement.offsetWidth,
+			document.documentElement.clientWidth
+		  );
+		}
+
+		function getHeight() {
+		  return Math.max(
+			document.body.scrollHeight,
+			document.documentElement.scrollHeight,
+			document.body.offsetHeight,
+			document.documentElement.offsetHeight,
+			document.documentElement.clientHeight
+		  );
+		}
 		
+		const size = getWidth() + 'x' + getHeight();
+		const img = document.getElementById('img');
+		const keyword = getParameterByName('keyword');
+		const interval = parseInt(getParameterByName('interval')) || 0;
 		img.src = `https://source.unsplash.com/${size}/?${keyword}`;
 		
 		if (interval > 0) {
@@ -33,6 +52,7 @@
 			},
 			interval*1000);
 		}
+		
     </script>
   </body>
 </html>

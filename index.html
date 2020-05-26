@@ -3,238 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <title>web-frame</title>
-
-    <style>
-      body {
-        margin: 0;
-        background-color: black;
-        font-family: Sans-Serif;
-        color: #a3a3a3;
-      }
-      img {
-        position: absolute;
-        left: 0;
-        -webkit-transition: opacity 1s ease-in-out;
-        -moz-transition: opacity 1s ease-in-out;
-        -o-transition: opacity 1s ease-in-out;
-        transition: opacity 1s ease-in-out;
-      }
-      img.transparent {
-        opacity: 0;
-      }
-      #welcome {
-        text-align: center;
-      }
-
-      #properties-modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
-        -webkit-animation-name: fadeIn;
-        -webkit-animation-duration: 0.4s;
-        animation-name: fadeIn;
-        animation-duration: 0.4s;
-      }
-      #properties-content {
-        width: 15em;
-        padding: 1em;
-        margin: 0;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        -ms-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-        background-color: #a3a3a3;
-        color: black;
-        margin: auto;
-        border: px solid black;
-      }
-
-      .full {
-        width: 100%;
-      }
-
-      .button {
-        border: none;
-        padding: 0.5em;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="app.js"></script> 
   </head>
   <body>
-    <div id="welcome">
-      <h1>Welcome to web-frame.</h1>
-      Tap anywhere to configure.
-      <p>
-        <button class="button" id="start">start</button>
-      </p>
-    </div>
 
-    <div id="properties-modal">
-      <div id="properties-content">
-        <p>
-          <button id="properties-next" class="button full">next</button>
-        </p>
+    <div id="elem-div-frame" class="frame" onclick="tap(event);">
 
-        <label for="properties-keyword"> Keyword:<br /> </label>
-        <input class="full" id="properties-keyword" />
-        <br />
-        <label for="properties-interval"> Interval [s]:<br /> </label>
-        <input class="full" type="number" id="properties-interval" min="0" />
+      <div id="elem-div-welcome" class="welcome">
+        <h1>Welcome to web-frame.</h1>
+        Tap anywhere to configure.
         <p>
-          <button class="button full">Apply</button>
+          <button id="elem-btn-welcome-start" class="button button-welcome">start</button>
         </p>
       </div>
+
+      <div id="elem-div-configuration-modal" class="configuration-modal">
+        <div class="configuration-content">
+          <b>actions</b>
+          <button id="elem-btn-configuration-next" class="button button-configuration full">next</button>
+          <button class="button button-configuration full">fullscreen</button>
+
+          <b>configuration</b>
+          <br />
+          <label for="elem-inp-configuration-keyword"> Keyword:<br /> </label>
+          <input id="elem-inp-configuration-keyword" />
+          <label for="elem-inp-configuration-interval"> Interval [s]:<br /> </label>
+          <input type="number" id="elem-inp-configuration-interval" min="0" />
+          <button class="button button-configuration full">Apply</button>
+        </div>
+      </div>
+
     </div>
 
     <script>
-      let counter = null;
-      let timer = null;
-      let interval = null;
-      let body = null;
-      let welcome = null;
-      let start = null;
-      let propertiesModal = null;
-      let propertiesContent = null;
-      let propertiesNext = null;
-      let propertiesKeyword = null;
-      let propertiesInterval = null;
-      let size = null;
-      let keyword = null;
-      let imgCurrent = null;
-      let imgPreload = null;
-
-      function getWidth() {
-        return Math.max(
-          document.body.scrollWidth,
-          document.documentElement.scrollWidth,
-          document.body.offsetWidth,
-          document.documentElement.offsetWidth,
-          document.documentElement.clientWidth
-        );
-      }
-
-      function getHeight() {
-        return Math.max(
-          document.body.scrollHeight,
-          document.documentElement.scrollHeight,
-          document.body.offsetHeight,
-          document.documentElement.offsetHeight,
-          document.documentElement.clientHeight
-        );
-      }
-
-      function newImage() {
-        counter += 1;
-        const img = new Image();
-        img.id = `img${counter}`;
-        img.src = `https://source.unsplash.com/${size}/?${keyword}#${counter}`;
-        body.insertBefore(img, imgCurrent);
-        return img;
-      }
-
-      async function nextImage() {
-				console.log('next');
-				console.log(imgCurrent);
-				console.log(imgPreload);				
-        if (imgCurrent) {
-					console.log('set transparent');
-					
-          imgCurrent.classList.add('transparent');
-          await new Promise((r) => setTimeout(r, 1500));
-          body.removeChild(imgCurrent);
-        }
-        imgCurrent = imgPreload;
-        imgPreload = newImage();
-      }
-
-      function openProperties() {
-				clearInterval(timer);
-        propertiesKeyword.value = keyword;
-        propertiesInterval.value = interval;
-      }
-
-      function closeProperties() {
-				if ( keyword !== propertiesKeyword.value ) {
-					keyword = propertiesKeyword.value;
-					localStorage.setItem('web-frame-keyword', keyword);
-					imgPreload.src = `https://source.unsplash.com/${size}/?${keyword}#${counter}`;
-				}
-        interval = propertiesInterval.value;
-        localStorage.setItem('web-frame-interval', interval);
-				if (welcome) {
-					body.removeChild(welcome);
-					welcome = null;
-				}
-				nextImage();
-				startInterval();
-      }
-
-      function init() {
-        body = document.getElementsByTagName('BODY')[0];
-        welcome = document.getElementById('welcome');
-        start = document.getElementById('start');
-        propertiesModal = document.getElementById('properties-modal');
-        propertiesContent = document.getElementById('properties-content');
-        propertiesNext = document.getElementById('properties-next');
-        propertiesKeyword = document.getElementById('properties-keyword');
-        propertiesInterval = document.getElementById('properties-interval');
-
-        window.onclick = function () {
-          if (
-            event.target == start ||
-            event.target == propertiesContent ||
-            event.target == propertiesNext ||
-            event.target == propertiesKeyword ||
-            event.target == propertiesInterval
-          ) {
-            return;
-          }
-          if (propertiesModal.style.display !== 'block') {
-            openProperties();
-            propertiesModal.style.display = 'block';
-          } else {
-            closeProperties();
-            propertiesModal.style.display = 'none';
-          }
-        };
-        start.onclick = onStart;
-				propertiesNext.onclick = nextImage;
-
-        size = getWidth() + 'x' + getHeight();
-        keyword = localStorage.getItem('web-frame-keyword');
-
-        counter = 0;
-
-        interval = parseInt(localStorage.getItem('web-frame-interval')) || 0;
-      }
-
-			function startInterval() {
-				if (interval > 0) {
-          timer = setInterval(function () {
-            nextImage();
-          }, interval * 1000);
-        }
-			}
-
-      function onStart() {
-        body.removeChild(welcome);
-				welcome = null;
-				imgPreload = newImage();
-        nextImage();
-        startInterval();
-      }
-
       init();
     </script>
+
   </body>
 </html>

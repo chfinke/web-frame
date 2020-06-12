@@ -1,2 +1,2 @@
 # web-frame
-Window frame using unsplash
+Web-based frame using unsplash

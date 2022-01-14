@@ -1,2 +1,2 @@
 # web-frame
-Web-based frame using unsplash
+Web-based picture frame utilizing old tablets or smartphones.

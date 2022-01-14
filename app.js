@@ -1,3 +1,5 @@
+DEBUG = true;
+
 timer = null;
 keyword = null;
 interval = null;
@@ -24,7 +26,8 @@ function init() {
   size = getWidth() + 'x' + getHeight();
 }
 
-function tap (event) {
+function tap(event) {
+  // this is called whenever you click or tap on the screen
   switch (event.target.id) {
     case 'elem-btn-welcome-start':
       start();
@@ -37,7 +40,7 @@ function tap (event) {
       return;
   }
   
-  if (! configurationIsOpen()) {
+  if (! isConfigurationOpen()) {
     openConfiguration();
   } else {
     closeConfiguration();
@@ -45,49 +48,56 @@ function tap (event) {
 }
 
 function start() {
+  if (interval == 0) {
+    !DEBUG || console.log('no interval set');
+    return;
+  }
+  
   if (elemWelcome) {
     elemFrame.removeChild(elemWelcome);
     elemWelcome = null;
   }
+  
+  const timeout = parseInt( parseInt(interval) * 1000);
 
   if (!elemImageCurrent) {
-    elemImageCurrent = create();
-    elemImagePreload = create();
-    // @TODO fix order or duplicate
+    elemImageCurrent = createImage();
+    setTimeout(function(){
+      elemImagePreload = createImage();
+    }, timeout / 2);
   }
 
-  if (interval > 0) {
-    // @TODO why does this not work ????
-    console.log('start timer');
-    setInterval(function(){ console.log("Hello"); }, 1000);
-    timer = setInterval(function(){ 
-      console.log('next');
-      next();
-     }, parseInt( parseInt(interval) * 1000) );
-    console.log(timer);
-  }
+  timer = setInterval(function(){ 
+    next();
+    }, timeout
+  );
+  !DEBUG || console.log('start timer', timer);
 }
 
 function stop() {
+  if (!timer) {
+    return;
+  }
   clearInterval(timer);
+  !DEBUG || console.log('stop timer', timer);
 }
 
 function next() {
-  // @TODO does not preload next image
+  !DEBUG || console.log('next');
   if (elemImageCurrent) {
     elemImageCurrent.classList.add('transparent');
     setTimeout(function() {
       elemFrame.removeChild(elemImageCurrent);
       elemImageCurrent = elemImagePreload;
-      elemImagePreload = create();
+      elemImagePreload = createImage();
     }, 1500);
   } else {
     elemImageCurrent = elemImagePreload;
-    elemImagePreload = create();
+    elemImagePreload = createImage();
   }
 }
 
-function configurationIsOpen() {
+function isConfigurationOpen() {
   return elemConfigurationModal.style.display === 'block'
 }
 
@@ -133,11 +143,11 @@ function getHeight() {
   );
 }
 
-function create() {
+function createImage() {
   counter += 1;
   const img = new Image();
   img.id = `elem-img-${counter}`;
-  img.src = `https://source.unsplash.com/${size}/?${keyword}#${counter}`;
+  img.src = `https://source.unsplash.com/${size}/?${keyword}&seed=${counter}`;
   if (elemImageCurrent) {
     elemFrame.insertBefore(img, elemImageCurrent);
   } else {
